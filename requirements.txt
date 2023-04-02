@@ -1,0 +1,11 @@
+levenshtein
+stanza
+spacy
+pandas
+numpy
+crosslingual_coreference
+spacy-transformers
+itertools
+networkx
+matplotlib
+beautifulsoup4
