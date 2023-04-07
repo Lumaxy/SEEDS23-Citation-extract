@@ -29,7 +29,6 @@ def appartient_a_la_base(person, vip_list):
             
             current_list  = full_name_person_lowercase.copy()
             current_list.remove(element)
-            print(current_list)
             # We want to refine with a second match
             
             two_match = one_match[(one_match['pers_nom'].isin(current_list)) | (one_match['pers_prenom'].isin(current_list))]
