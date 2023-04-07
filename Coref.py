@@ -2,31 +2,47 @@ from spacy.tokens import Span
 from itertools import islice
 
 
-def appartient_a_la_base(person: str, vip_list) -> str:
-    """
-    Test si la personne est dans la liste des vips
-    """
+def appartient_a_la_base(person, vip_list):
     full_name_person = person.split(' ')
-    if len(full_name_person) > 6:
+    if len(full_name_person)>6: 
         # il est possible que des phrases soient detectées comme correspondance, on veut les éliminer.
-        # exemple :
+        # exemple : 
         # "proposition de loi, déposée par Aurore Bergé (Renaissance) visant à imposer une peine d’inéligibilité à davantage d’auteurs de violences"
         # est associé à "Le texte"
-        # aurore bergé peut être detectée dans la premiere proposition, mais ce n'est pas souhaitable
+        # aurore bergé peut étre detectée dans la premiere proposition, mais ce n'est pas souhaitable
         return ""
     full_name_person_lowercase = [x.lower() for x in full_name_person]
-    one_match = vip_list[vip_list['pers_nom'].isin(full_name_person_lowercase)]
-    two_match = one_match[one_match['pers_prenom'].isin(
-        full_name_person_lowercase)]
-    if len(two_match.index) == 1:
-        prenom = two_match.loc[two_match.index[0]]['pers_prenom']
-        prenom = prenom[0].upper() + prenom[1:]
+    
+    if len(full_name_person_lowercase) == 1: # On considère que c'est nécessairement le nom de famille
+        one_match = vip_list[vip_list['pers_nom'].isin(full_name_person_lowercase)]
+        if len(one_match.index) == 1:
+            prenom = one_match.loc[one_match.index[0]]['pers_prenom']
+            prenom = prenom[0].upper() + prenom[1:]
 
-        nom = two_match.loc[two_match.index[0]]['pers_nom']
-        nom = nom[0].upper() + nom[1:]
-        return prenom + " " + nom
+            nom = one_match.loc[one_match.index[0]]['pers_nom']
+            nom = nom[0].upper() + nom[1:]
+            return  prenom+ " "+ nom
     else:
-        return ""
+        for element in full_name_person_lowercase:
+            one_match = vip_list[(vip_list['pers_nom'].isin([element])) | (vip_list['pers_prenom'].isin([element]))]
+            # The element is part of the name
+            
+            current_list  = full_name_person_lowercase.copy()
+            current_list.remove(element)
+            print(current_list)
+            # We want to refine with a second match
+            
+            two_match = one_match[(one_match['pers_nom'].isin(current_list)) | (one_match['pers_prenom'].isin(current_list))]
+            if len(two_match.index) == 1:
+                prenom = two_match.loc[two_match.index[0]]['pers_prenom']
+                prenom = prenom[0].upper() + prenom[1:]
+
+                nom = two_match.loc[two_match.index[0]]['pers_nom']
+                nom = nom[0].upper() + nom[1:]
+                return  prenom+ " "+ nom
+            else:
+                return ""
+    return ""
 
 
 def element_is_vip(list_person: list, vip_list) -> list[str]:
